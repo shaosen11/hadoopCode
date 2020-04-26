@@ -17,7 +17,7 @@ import java.io.IOException;
 public class FlowSumDriver {
     public static void main(String[] args) throws InterruptedException, IOException, ClassNotFoundException {
 
-        args = new String[]{"D:/hadoop/input/phone_data.txt", "D:/hadoop/output/flowsum"};
+        args = new String[]{"D:/hadoop/input/phone_data.txt", "D:/hadoop/output/flowsum2"};
         Configuration conf = new Configuration();
         // 1 获取job对象
         Job job = Job.getInstance(conf);
@@ -35,6 +35,10 @@ public class FlowSumDriver {
         // 5 设置最终输出的key和value类型
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(FlowBean.class);
+
+        //设置分区
+        job.setPartitionerClass(ProvincePartition.class);
+        job.setNumReduceTasks(5);
 
         // 6 设置输入输出路径
         FileInputFormat.setInputPaths(job, new Path(args[0]));
