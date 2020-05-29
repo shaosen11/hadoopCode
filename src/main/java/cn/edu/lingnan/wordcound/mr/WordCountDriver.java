@@ -4,6 +4,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.compress.BZip2Codec;
+import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -18,8 +20,14 @@ import java.io.IOException;
 public class WordCountDriver {
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
 
-        args = new String[]{"D:/hadoop/input/hadooptest.txt", "D:/hadoop/output/mr2"};
+        args = new String[]{"hdfs://hadoop112:9000/user/atguigu/input/shaosen", "D:/hadoop/output/mr5"};
         Configuration conf = new Configuration();
+
+        //开启map端输出压缩
+        conf.setBoolean("mapreduce.map.output.compress", true);
+        //设置map端输出压缩方式
+        conf.setClass("mapreduce.map.out.compress.codec", BZip2Codec.class, CompressionCodec.class);
+
         // 1 获取JOB对象
         Job job = Job.getInstance(conf);
 
@@ -39,6 +47,13 @@ public class WordCountDriver {
         job.setOutputValueClass(IntWritable.class);
 
         job.setCombinerClass(WordCountReducer.class);
+
+        //设置reduce端输出压缩开启
+        FileOutputFormat.setCompressOutput(job, true);
+
+        //设置压缩的方式
+        FileOutputFormat.setOutputCompressorClass(job, BZip2Codec.class);
+
 
         // 6 设置输入路径和输出路径
         FileInputFormat.setInputPaths(job, new Path(args[0]));
